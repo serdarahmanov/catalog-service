@@ -34,7 +34,7 @@ public class BookControllerMvcTests {
                 .willThrow(BookNotFoundException.class);
 
 //        the http mocking tool is being used
-        mockMvc.perform(get("/books/"+isbn)).andExpect(status().isCreated());
+        mockMvc.perform(get("/books/"+isbn)).andExpect(status().isNotFound());
     }
 
 }
