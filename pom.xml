@@ -58,19 +58,47 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--This is Spring Config Client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
     </dependencies>
+
+
+    <!--    The Bill of Materials .-->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2025.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 
     <build>
 
         <plugins>
+
+            <!-- Spring Boot plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
 
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>testData</spring.profiles.active>
+
+                    </systemPropertyVariables>
+                </configuration>
 
             </plugin>
 
+            <!-- Compiler plugin -->
 
             <!--  this plugin is needed to enable Config-annotation-processor
             to create spring-configuration-metadata.json file -->
