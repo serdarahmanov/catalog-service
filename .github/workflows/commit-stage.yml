@@ -1,5 +1,12 @@
-name: Commit Stage
-on: push
+name: Commit Stage #Workflow name
+on: push #trigger
+
+#env:  <- global environment variables
+
+env: #this is for pushing the container image to github container registry
+  REGISTRY: ghrc.io
+  IMAGE_NAME: serdarahmanov/catalog-service
+  VERSION: latest
 jobs:
   build:
     name: Build and Test
@@ -14,7 +21,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 24
+          java-version: 17
           cache: maven
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v3
@@ -31,3 +38,45 @@ jobs:
           sarif_file: ${{steps.scan.outputs.sarif}}
       - name: Build, unit tests and integration tests
         run: mvn -B clean verify
+  package:
+    name: Package and Publish
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: [ build ] #depends on the build job completing first
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write  #to enable to publish the image to packages
+      security-events: write
+    steps:
+      - name: Checkout source code #this copies the source code into virtual machine where the workflow runs in
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+      - name: Build container image
+        run: |
+          ./mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{env.VERSION}}
+      - name: OCI image vulnerability scanning
+        uses: anchore/scan-action@v3
+        id: scan2
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          fail-build: false
+          severity-cutoff: high
+          output-format: sarif
+      - name: Upload the vulnerability report
+        uses: github/codeql-action/upload-sarif@v2
+        if: success() || failure()
+        with:
+          sarif_file: ${{steps.scan2.outputs.sarif}}
+      - name: Log into container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{env.REGISTRY}}
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Publish the image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}

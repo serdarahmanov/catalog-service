@@ -34,10 +34,14 @@ public class BookService {
         return repo.findByIsbn(isbn).map(x-> {
 
             var bookToUpdate = new Book(
+                    x.id(),
                     x.isbn(),
                     book.title(),
                     book.author(),
-                    book.price()
+                    book.price(),
+                    x.createdDate(),
+                    x.lastModifiedDate(), //it will be updated if the update succeeds
+                    x.version()
             );
             return repo.save(bookToUpdate);
         }).orElseGet(()-> addBookToCatalog(book));

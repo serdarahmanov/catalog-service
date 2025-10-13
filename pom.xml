@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.polarbookshop</groupId>
@@ -27,7 +27,9 @@
         <url/>
     </scm>
     <properties>
-        <java.version>24</java.version>
+        <java.version>17</java.version>
+<!--        the default image name , if it is nor defined via CLI when pushing the image-->
+        <imageName>${project.artifactId}</imageName>
     </properties>
     <dependencies>
         <dependency>
@@ -63,11 +65,88 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
         </dependency>
+        <!--To retry creating connection between config server-->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <!--To refresh config properties manually by sending POST request built-in endpoint that provides
+        Spring Actuator , manual refresh-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!--        Spring Data JDBC module , more compact and easy to use then Spring Data JPA-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
+        </dependency>
+        <!--JDBC driver for Postgre Sql database-->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <!--            <version>42.7.7</version>-->
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- Core Testcontainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.21.3</version> <!-- use latest -->
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit Jupiter integration (if you're using JUnit 5) -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Example: PostgreSQL module of TestContainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>1.21.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--        Transitive dependency from   TestContainer-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.28.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!--Transitive dependency from commons-compress-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
+        </dependency>
+
+
+        <!--Version management Tool for Database migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <!-- use a version compatible with your Flyway core -->
+        </dependency>
+
     </dependencies>
 
 
-    <!--    The Bill of Materials .-->
     <dependencyManagement>
+        <!--    The Bill of Materials for Spring Cloud Config Client.-->
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -76,7 +155,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+
         </dependencies>
+
+
     </dependencyManagement>
 
 
@@ -90,6 +173,23 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
 
                 <configuration>
+                    <!--Task to build OCI image via Paketo build-packs-->
+                    <image>
+                        <name>${imageName}</name>
+                        <env>
+                            <BP_JVM_VERSION>17.*</BP_JVM_VERSION>
+                        </env>
+
+
+                    </image>
+                    <docker>
+                        <publishRegistry>
+                            <username>${registryUsername}</username>
+                            <password>${registryToken}</password>
+                            <url>${registryUrl}</url>
+                        </publishRegistry>
+                    </docker>
+
                     <systemPropertyVariables>
                         <spring.profiles.active>testData</spring.profiles.active>
 
@@ -107,12 +207,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>24</release>
+                    <release>17</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.springframework.boot</groupId>
                             <artifactId>spring-boot-configuration-processor</artifactId>
-                            <version>3.5.5</version>
+                            <version>3.5.6</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

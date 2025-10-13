@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:14.4:///
+
+
+#  we cloud define db name as well , but if we do not ,
+#  spring will use default db inPostgres which is usually "postgres"
+
+# When Spring encounters with this kind of url jdbc:tc:postgresql:14.4:///
+#  it gives the job to TestContainers

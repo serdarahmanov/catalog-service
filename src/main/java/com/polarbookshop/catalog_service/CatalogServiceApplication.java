@@ -13,6 +13,11 @@ public class CatalogServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CatalogServiceApplication.class, args);
+
+
+		System.out.println("Java version: " + System.getProperty("java.version"));
+		System.out.println("Runtime: " + System.getProperty("java.runtime.name"));
+		System.out.println("Vendor: " + System.getProperty("java.vendor"));
 	}
 
 }

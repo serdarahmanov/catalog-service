@@ -19,7 +19,7 @@ public class BookJsonTests {
 
     @Test
     void testSerialization() throws IOException {
-        var book = new Book("1234567891", "Title", "Author", 9.90);
+        var book =  Book.of("1234567891", "Title", "Author", 9.90);
         var jsonContent = jsontester.write(book); // it can throw exception
 
         assertThat(jsonContent).extractingJsonPathStringValue("@.isbn").isEqualTo(book.isbn());
@@ -43,6 +43,6 @@ public class BookJsonTests {
 
         assertThat(jsontester.parse(content)) // parse method can throw IOException
                 .usingRecursiveComparison() // Compares all the fields and embedded contents recursively
-                .isEqualTo(new Book("1234567891", "Title", "Author", 9.90));
+                .isEqualTo(Book.of("1234567891", "Title", "Author", 9.90));
     }
 }
