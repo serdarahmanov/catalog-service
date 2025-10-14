@@ -4,7 +4,7 @@ on: push #trigger
 #env:  <- global environment variables
 
 env: #this is for pushing the container image to github container registry
-  REGISTRY: ghrc.io
+  REGISTRY: ghcr.io
   IMAGE_NAME: serdarahmanov/catalog-service
   VERSION: latest
 jobs:
@@ -57,8 +57,8 @@ jobs:
           java-version: 17
           cache: maven
       - name: Build container image
-        run: |
-          ./mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{env.VERSION}}
+        run:
+          mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{env.VERSION}}
       - name: OCI image vulnerability scanning
         uses: anchore/scan-action@v3
         id: scan2
@@ -68,7 +68,7 @@ jobs:
           severity-cutoff: high
           output-format: sarif
       - name: Upload the vulnerability report
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: success() || failure()
         with:
           sarif_file: ${{steps.scan2.outputs.sarif}}
